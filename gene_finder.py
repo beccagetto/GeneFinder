@@ -30,8 +30,15 @@ def get_complement(nucleotide):
     >>> get_complement('C')
     'G'
     """
-    # TODO: implement this
-    pass
+
+    if nucleotide == 'A':
+        return 'T'
+    if nucleotide == 'T':
+        return 'A'
+    if nucleotide == 'G':
+        return 'C'
+    if nucleotide == 'C':
+        return 'G'
 
 
 def get_reverse_complement(dna):
@@ -45,8 +52,12 @@ def get_reverse_complement(dna):
     >>> get_reverse_complement("CCGCGTTCA")
     'TGAACGCGG'
     """
-    # TODO: implement this
-    pass
+    complement = ''
+
+    for i in range(0, len(dna)):
+        complement += get_complement(dna[i])
+
+    return complement[::-1]
 
 
 def rest_of_ORF(dna):
@@ -62,8 +73,17 @@ def rest_of_ORF(dna):
     >>> rest_of_ORF("ATGAGATAGG")
     'ATGAGA'
     """
-    # TODO: implement this
-    pass
+
+    for i in range(0, len(dna), 3):
+        codon = dna[i:i+3]
+        if codon == 'TAG':
+            return dna[:i]
+        elif codon == 'TAA':
+            return dna[:i]
+        elif codon == 'TGA':
+            return dna[:i]
+
+    return dna
 
 
 def find_all_ORFs_oneframe(dna):
@@ -79,9 +99,20 @@ def find_all_ORFs_oneframe(dna):
     >>> find_all_ORFs_oneframe("ATGCATGAATGTAGATAGATGTGCCC")
     ['ATGCATGAATGTAGA', 'ATGTGCCC']
     """
-    # TODO: implement this
-    pass
 
+    nnORFs = []
+    i = 0
+
+    while (i < len(dna)):
+        codon = dna[i:i+3]
+        if codon == 'ATG':
+            orf = rest_of_ORF(dna[i:])
+            nnORFs.append(orf)
+            i += len(orf)
+        else:
+            i += 3
+
+    return nnORFs 
 
 def find_all_ORFs(dna):
     """ Finds all non-nested open reading frames in the given DNA sequence in
@@ -96,8 +127,13 @@ def find_all_ORFs(dna):
     >>> find_all_ORFs("ATGCATGAATGTAG")
     ['ATGCATGAATGTAG', 'ATGAATGTAG', 'ATG']
     """
-    # TODO: implement this
-    pass
+    allORFs = []
+
+    for i in range(3):
+        ORFs = find_all_ORFs_oneframe(dna[i:])
+        allORFs += ORFs
+
+    return allORFs
 
 
 def find_all_ORFs_both_strands(dna):
@@ -109,8 +145,16 @@ def find_all_ORFs_both_strands(dna):
     >>> find_all_ORFs_both_strands("ATGCGAATGTAGCATCAAA")
     ['ATGCGAATG', 'ATGCTACATTCGCAT']
     """
-    # TODO: implement this
-    pass
+    allORFs_both_strands = []
+
+    allORFs_forward = find_all_ORFs(dna)
+
+    reverse_complement = get_reverse_complement(dna)
+    allORFs_reverse_complement = find_all_ORFs(reverse_complement)
+
+    allORFs_both_strands = allORFs_forward + allORFs_reverse_complement
+
+    return allORFs_both_strands
 
 
 def longest_ORF(dna):
@@ -119,8 +163,15 @@ def longest_ORF(dna):
     >>> longest_ORF("ATGCGAATGTAGCATCAAA")
     'ATGCTACATTCGCAT'
     """
-    # TODO: implement this
-    pass
+    allORFs = find_all_ORFs_both_strands(dna)
+    longest_ORF = ''
+
+    for ORF in allORFs:
+        if len(ORF) > len(longest_ORF):
+            longest_ORF = ORF
+
+    return longest_ORF
+
 
 
 def longest_ORF_noncoding(dna, num_trials):
@@ -130,8 +181,21 @@ def longest_ORF_noncoding(dna, num_trials):
         dna: a DNA sequence
         num_trials: the number of random shuffles
         returns: the maximum length longest ORF """
-    # TODO: implement this
-    pass
+    
+    all_the_longest_ORFs = []
+    max_longest_ORF = ''
+    i = 0
+
+    while i <= num_trials:
+        shuffled_dna = ''.join(random.sample(dna, len(dna)))
+        print shuffled_dna
+        shuffled_longest_ORF = longest_ORF(shuffled_dna)
+        
+        if len(shuffled_longest_ORF) > len(max_longest_ORF):
+            max_longest_ORF = shuffled_longest_ORF
+        i += 1
+
+    return max_longest_ORF
 
 
 def coding_strand_to_AA(dna):
